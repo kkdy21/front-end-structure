@@ -1,0 +1,50 @@
+{
+  "name": "frontend-new-structure",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "dev:stag": "vite --mode staging",
+    "dev:prod": "vite --mode production",
+    "build": "tsc -b && vite build",
+    "build:dev": "tsc -b && vite build --mode development",
+    "build:stag": "tsc -b && vite build --mode staging",
+    "build:prod": "tsc -b && vite build --mode production",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.8.3",
+    "jwt-decode": "^4.0.0",
+    "qs": "^6.13.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.6.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/node": "^22.15.18",
+    "@types/qs": "^6.9.17",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.21.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "msw": "^2.8.4",
+    "msw-controller": "^1.1.7",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.2.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "src/msw",
+      "public"
+    ]
+  }
+}
