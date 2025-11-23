@@ -1,17 +1,16 @@
-import { useEffect } from "react";
 import "./App.css";
-import { useMenuStore } from "./repositories/menuRepository/store/menuStore";
+import TestPage from "./service/test/page/TestPage";
 
 function App() {
-  const { menus, fetchMenus } = useMenuStore();
-  console.log(menus);
+  // 테스트 모드: TestPage 렌더링
+  return <TestPage />;
 
-  useEffect(() => {
-    // window.mswControl?.help();
-    fetchMenus();
-  }, []);
-
-  return <></>;
+  // 기존 코드 (테스트 완료 후 복원)
+  // const { menus, fetchMenus } = useMenuStore();
+  // useEffect(() => {
+  //   fetchMenus();
+  // }, []);
+  // return <></>;
 }
 
 export default App;
