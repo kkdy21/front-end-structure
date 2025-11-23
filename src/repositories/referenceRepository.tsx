@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import { bookmarkRepository } from "./bookmarkRepository/api/bookmarkRepository";
 import { menuRepository } from "./menuRepository/api/menuRepository";
+import { studentRepository } from "./studentRepository/api/studentRepository";
 //한개의 referenceRepository를 만들어서 모든 repository들을 여기에 import 후 사용.
 // 추후 다른 repository들이 추가될 때마다 여기에 import
 
@@ -19,19 +20,20 @@ export const useRepository = () => {
 }
 
 export interface Repositories {
-  bookmark: typeof bookmarkRepository;
-  menu: typeof menuRepository;
+  bookmarkRepository: typeof bookmarkRepository;
+  menuRepository: typeof menuRepository;
+  studentRepository: typeof studentRepository;
 }
 
 export const referenceRepository: Repositories = {
-  bookmark: bookmarkRepository,
-  menu: menuRepository,
-  // 추후 다른 repository 인스턴스들도 여기에 추가
+  bookmarkRepository: bookmarkRepository,
+  menuRepository: menuRepository,
+  studentRepository: studentRepository,
 };
 
 export const RepositoryProvider = ({ repositories, children }: { repositories?: Repositories; children: ReactNode }) => {
   return (
-    <repositoriesConetxt.Provider value={repositories ?? referenceRepository}>
+    <repositoriesConetxt.Provider value={{ ...referenceRepository, ...repositories }}>
       {children}
     </repositoriesConetxt.Provider>
   );

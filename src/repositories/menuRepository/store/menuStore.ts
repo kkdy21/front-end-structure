@@ -7,35 +7,35 @@ import { baseInitialState } from "@/repositories/baseStore";
 import type { MenuDTO } from "@/repositories/menuRepository/schema/dto/menuDTO";
 
 interface MenuState extends BaseState, BaseActions {
-    // State
-    menus: MenuEntity[];
+  // State
+  menus: MenuEntity[];
 
-    // Actions
-    fetchMenus: (params?: GetMenuParameters) => Promise<void>;
+  // Actions
+  fetchMenus: (params?: GetMenuParameters) => Promise<void>;
 }
 
 export const useMenuStore = create<MenuState>((set) => {
-    const menu = referenceRepository.menu;
+  const menu = referenceRepository.menuRepository;
 
-    return {
-        // Initial State
-        ...baseInitialState,
-        menus: [],
+  return {
+    // Initial State
+    ...baseInitialState,
+    menus: [],
 
-        // Actions
-        fetchMenus: async (params) => {
-            set({ isLoading: true, error: null });
-            try {
-                const res = await menu.getMenuList(params);
-                const entities = res.data.map(
-                    (dto: MenuDTO, index: number) => new MenuEntity(dto, index)
-                );
-                set({ menus: entities, isLoading: false });
-            } catch (err) {
-                set({ error: err as Error, isLoading: false });
-            }
-        },
+    // Actions
+    fetchMenus: async (params) => {
+      set({ isLoading: true, error: null });
+      try {
+        const data = await menu.getMenuList(params);
+        const entities = data.map(
+          (dto: MenuDTO, index: number) => new MenuEntity(dto, index)
+        );
+        set({ menus: entities, isLoading: false });
+      } catch (err) {
+        set({ error: err as Error, isLoading: false });
+      }
+    },
 
-        clearError: () => set({ error: null }),
-    };
+    clearError: () => set({ error: null }),
+  };
 });

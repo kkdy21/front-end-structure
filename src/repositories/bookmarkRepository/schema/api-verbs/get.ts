@@ -1,5 +1,5 @@
 export type BookmarkGetParameters = {
-  bookMark_id: string;
+  bookmarkId: string;
 };
 
 export type BookmarkGetListParameters = {

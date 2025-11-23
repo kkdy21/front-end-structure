@@ -1,4 +1,4 @@
-import { bookmarkTypeOptionsManager } from "./constants";
+import { bookmarkTypeOptions } from "./constants";
 
-export type BookmarkTypeId = keyof typeof bookmarkTypeOptionsManager.ID;
+export type BookmarkTypeId = keyof typeof bookmarkTypeOptions.ID;
 

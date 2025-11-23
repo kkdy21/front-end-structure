@@ -1,5 +1,5 @@
 import type { BookmarkDTO } from "../schema/dto/bookmarkDTO";
-import { bookmarkTypeOptionsManager } from "../constants";
+import { bookmarkTypeOptions } from "../constants";
 import { BookmarkTypeId } from "../types";
 
 export class BookmarkEntity {
@@ -32,10 +32,10 @@ export class BookmarkEntity {
 
   get bookmarkType(): BookmarkTypeId {
     // 백엔드 오는 value를 프론트가 관리하는 id로변환
-    if (bookmarkTypeOptionsManager.isValidOptionValue(this._dto.type)) {
-      return bookmarkTypeOptionsManager.getOptionByValue(this._dto.type).id;
+    if (bookmarkTypeOptions.isValidOptionValue(this._dto.type)) {
+      return bookmarkTypeOptions.getOptionByValue(this._dto.type).id;
     }
-    return bookmarkTypeOptionsManager.ID.USER;
+    return bookmarkTypeOptions.ID.USER;
   }
   get dto(): BookmarkDTO {
     return this._dto;

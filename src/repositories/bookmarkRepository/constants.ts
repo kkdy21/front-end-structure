@@ -1,3 +1,4 @@
+import { createOptions } from "@/utils/optionsFactory";
 
 const BOOKMARK_TYPE_OPTIONS = [
   { id: "ADMIN", value: "1", label: "관리자" },
@@ -11,7 +12,8 @@ const BOOKMARK_TYPE_ALL_OPTION = {
   label: "북마크 타입 전체",
 } as const;
 
-export const bookmarkTypeOptionsManager = createConstOptionsManager(
+export const bookmarkTypeOptions = createOptions(
   BOOKMARK_TYPE_OPTIONS,
   BOOKMARK_TYPE_ALL_OPTION
 );
+
