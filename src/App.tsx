@@ -1,16 +1,13 @@
 import "./App.css";
-import TestPage from "./service/test/page/TestPage";
+import { RouterProvider, router } from "./router";
+import { AuthProvider } from "./service/auth/components/AuthProvider";
 
 function App() {
-  // 테스트 모드: TestPage 렌더링
-  return <TestPage />;
-
-  // 기존 코드 (테스트 완료 후 복원)
-  // const { menus, fetchMenus } = useMenuStore();
-  // useEffect(() => {
-  //   fetchMenus();
-  // }, []);
-  // return <></>;
+    return (
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
+    );
 }
 
 export default App;
