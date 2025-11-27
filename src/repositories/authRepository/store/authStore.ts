@@ -1,8 +1,5 @@
 import { create } from 'zustand';
 import type { User as FirebaseUser, Unsubscribe } from 'firebase/auth';
-import type { User } from '@/repositories/userRepository/schema/dto/userDTO';
-import type { Permissions } from '@/repositories/roleRepository/types';
-import { RoleEntity } from '@/repositories/roleRepository/entity/roleEntity';
 import type { BaseState, BaseActions } from '@/repositories/baseStore';
 import { baseInitialState } from '@/repositories/baseStore';
 import type { LoginParameters, SignupParameters } from '../schema/api-verbs/login';
@@ -10,34 +7,28 @@ import { authRepository } from '../api/authRepository';
 
 interface AuthState extends BaseState, BaseActions {
     // State
-    user: User | null;
-    role: RoleEntity | null;
-    permissions: Permissions;
+    firebaseUser: FirebaseUser | null;      // Firebase Auth User
     isAuthenticated: boolean;
     isInitializing: boolean;
 
     // Actions - 인증
-    login: (params: LoginParameters) => Promise<void>;
-    signup: (params: SignupParameters) => Promise<void>;
+    login: (params: LoginParameters) => Promise<FirebaseUser>;
+    signup: (params: SignupParameters) => Promise<FirebaseUser>;
     logout: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
 
     // Actions - 상태 관리
-    restoreAuthState: (firebaseUser: FirebaseUser) => Promise<void>;
-    subscribeAuthState: (
-        onInitialized: () => void
-    ) => Unsubscribe;
+    subscribeAuthState: (onInitialized: () => void) => Unsubscribe;
 
     // Actions - 내부
-    setPermissions: (permissions: Permissions) => void;
+    setFirebaseUser: (user: FirebaseUser | null) => void;
+    setInitializing: (isInitializing: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
     // Initial State
     ...baseInitialState,
-    user: null,
-    role: null,
-    permissions: {},
+    firebaseUser: null,
     isAuthenticated: false,
     isInitializing: true,
 
@@ -45,14 +36,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     login: async (params) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await authRepository.login(params);
-            const roleEntity = new RoleEntity(response.role);
+            const firebaseUser = await authRepository.login(params);
             set({
-                user: response.user,
-                role: roleEntity,
+                firebaseUser,
                 isAuthenticated: true,
                 isLoading: false,
             });
+            return firebaseUser;
         } catch (err) {
             set({ error: err as Error, isLoading: false });
             throw err;
@@ -62,8 +52,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     signup: async (params) => {
         set({ isLoading: true, error: null });
         try {
-            await authRepository.signup(params);
+            const firebaseUser = await authRepository.signup(params);
             set({ isLoading: false });
+            return firebaseUser;
         } catch (err) {
             set({ error: err as Error, isLoading: false });
             throw err;
@@ -75,9 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             await authRepository.logout();
             set({
-                user: null,
-                role: null,
-                permissions: {},
+                firebaseUser: null,
                 isAuthenticated: false,
                 isLoading: false,
             });
@@ -99,53 +88,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     // Actions - 상태 관리
-    restoreAuthState: async (firebaseUser) => {
-        try {
-            const response = await authRepository.restoreAuthState(firebaseUser);
-            if (response) {
-                const roleEntity = new RoleEntity(response.role);
-                set({
-                    user: response.user,
-                    role: roleEntity,
-                    isAuthenticated: true,
-                });
-            } else {
-                // 유저/role 정보 없으면 로그아웃 처리
-                await authRepository.logout();
-                set({
-                    user: null,
-                    role: null,
-                    permissions: {},
-                    isAuthenticated: false,
-                });
-            }
-        } catch (err) {
-            console.error('인증 상태 복원 실패:', err);
-            await authRepository.logout();
-            set({
-                user: null,
-                role: null,
-                permissions: {},
-                isAuthenticated: false,
-                error: err as Error,
-            });
-        }
-    },
-
     subscribeAuthState: (onInitialized) => {
         return authRepository.subscribeAuthState(
             // 로그인 상태
-            async (firebaseUser) => {
-                await get().restoreAuthState(firebaseUser);
-                set({ isInitializing: false });
+            (firebaseUser) => {
+                set({
+                    firebaseUser,
+                    isAuthenticated: true,
+                    isInitializing: false,
+                });
                 onInitialized();
             },
             // 로그아웃 상태
             () => {
                 set({
-                    user: null,
-                    role: null,
-                    permissions: {},
+                    firebaseUser: null,
                     isAuthenticated: false,
                     isInitializing: false,
                 });
@@ -155,7 +112,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     // Actions - 내부
-    setPermissions: (permissions) => set({ permissions }),
+    setFirebaseUser: (user) => set({
+        firebaseUser: user,
+        isAuthenticated: !!user,
+    }),
+
+    setInitializing: (isInitializing) => set({ isInitializing }),
 
     clearError: () => set({ error: null }),
 }));

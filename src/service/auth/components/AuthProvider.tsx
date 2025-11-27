@@ -1,24 +1,50 @@
 import { useEffect, type ReactNode } from 'react';
 import { useAuthStore } from '@/repositories/authRepository/store/authStore';
-import { Loading } from '@/shared/components/Loading';
+import { useRoleStore } from '@/repositories/roleRepository/store/roleStore';
+import { useUserStore } from '@/repositories/userRepository/store/userStore';
+import { Loading } from '@/components/Loading';
 
 interface AuthProviderProps {
     children: ReactNode;
 }
 
 /**
- * 앱 초기화 시 Firebase Auth 상태를 감지하고 authStore를 복원하는 Provider
+ * 앱 초기화 시 Firebase Auth 상태를 감지하고 관련 store들을 복원하는 Provider
  * App.tsx에서 최상위에 감싸서 사용
+ *
+ * 컨벤션:
+ * - AuthProvider는 여러 store를 조합하는 역할만 담당
+ * - 각 store는 독립적으로 자신의 상태만 관리
  */
 export function AuthProvider({ children }: AuthProviderProps) {
     const { isInitializing, subscribeAuthState } = useAuthStore();
+    const { getRoleByUserId, clearCurrentRole } = useRoleStore();
+    const { getUserById, clearCurrentUser } = useUserStore();
 
     useEffect(() => {
         let unsubscribe: (() => void) | undefined;
 
         try {
-            unsubscribe = subscribeAuthState(() => {
-                // 초기화 완료 콜백
+            unsubscribe = subscribeAuthState(async () => {
+                // 초기화 완료 후 Firebase User가 있으면 추가 정보 로드
+                const firebaseUser = useAuthStore.getState().firebaseUser;
+                if (firebaseUser) {
+                    try {
+                        await Promise.all([
+                            getUserById(firebaseUser.uid),
+                            getRoleByUserId(firebaseUser.uid),
+                        ]);
+                    } catch (err) {
+                        console.error('사용자 정보 로드 실패:', err);
+                        // 정보 로드 실패 시 초기화
+                        clearCurrentUser();
+                        clearCurrentRole();
+                    }
+                } else {
+                    // 로그아웃 상태면 모든 상태 초기화
+                    clearCurrentUser();
+                    clearCurrentRole();
+                }
             });
         } catch (err) {
             // Firebase 초기화 실패 시 (env 설정 오류 등)
@@ -27,7 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         return () => unsubscribe?.();
-    }, [subscribeAuthState]);
+    }, [subscribeAuthState, getUserById, getRoleByUserId, clearCurrentUser, clearCurrentRole]);
 
     if (isInitializing) {
         return <Loading />;

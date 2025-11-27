@@ -1,8 +1,10 @@
-import { useAuthStore } from '@/repositories/authRepository/store/authStore';
+import { useUserStore } from '@/repositories/userRepository/store/userStore';
+import { useRoleStore } from '@/repositories/roleRepository/store/roleStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function DashboardHome() {
-    const { user, role } = useAuthStore();
+    const { currentUser } = useUserStore();
+    const { currentRole } = useRoleStore();
 
     return (
         <div className="space-y-6">
@@ -17,15 +19,15 @@ export function DashboardHome() {
                         <dl className="space-y-2">
                             <div className="flex">
                                 <dt className="w-24 font-medium text-muted-foreground">이름:</dt>
-                                <dd>{user?.name}</dd>
+                                <dd>{currentUser?.name}</dd>
                             </div>
                             <div className="flex">
                                 <dt className="w-24 font-medium text-muted-foreground">이메일:</dt>
-                                <dd>{user?.email}</dd>
+                                <dd>{currentUser?.email}</dd>
                             </div>
                             <div className="flex">
                                 <dt className="w-24 font-medium text-muted-foreground">역할:</dt>
-                                <dd>{role?.name}</dd>
+                                <dd>{currentRole?.name}</dd>
                             </div>
                         </dl>
                     </CardContent>
@@ -37,7 +39,7 @@ export function DashboardHome() {
                     </CardHeader>
                     <CardContent>
                         <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-                            {role?.pageAccess.map((access) => (
+                            {currentRole?.pageAccess.map((access) => (
                                 <li key={access}>
                                     <code className="rounded bg-muted px-1 py-0.5 text-sm">{access}</code>
                                 </li>

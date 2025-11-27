@@ -1,2 +1,2 @@
 export type { LoginParameters, SignupParameters, ResetPasswordParameters } from './schema/api-verbs/login';
-export type { LoginResponseDTO } from './schema/dto/authDTO';
+export type { AuthErrorDTO } from './schema/dto/authDTO';

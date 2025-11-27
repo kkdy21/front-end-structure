@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
+import { useAuth } from '../hooks/useAuth';
 import { useAuthStore } from '@/repositories/authRepository/store/authStore';
+import { useRoleStore } from '@/repositories/roleRepository/store/roleStore';
+import { useUserStore } from '@/repositories/userRepository/store/userStore';
 import { DASHBOARD_ROUTES } from '@/service/dashboard/routes/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RoleEntity } from '@/repositories/roleRepository/entity/roleEntity';
+import { UserEntity } from '@/repositories/userRepository/entity/userEntity';
 
 // 테스트용 Mock 데이터 (2 depth 기준)
 const MOCK_USERS = {
@@ -45,7 +49,7 @@ const MOCK_USERS = {
 export function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login, isLoading, error } = useAuthStore();
+    const { login, isLoading, error } = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -62,16 +66,28 @@ export function LoginPage() {
         }
     };
 
-    // 테스트용 Mock 로그인
+    // 테스트용 Mock 로그인 - 각 store 독립적으로 업데이트
     const handleMockLogin = (userType: keyof typeof MOCK_USERS) => {
         const mockData = MOCK_USERS[userType];
         const roleEntity = new RoleEntity(mockData.role);
+        const userEntity = new UserEntity(mockData.user);
 
-        // store 직접 업데이트
+        // 각 store 독립적으로 업데이트
         useAuthStore.setState({
-            user: mockData.user,
-            role: roleEntity,
+            firebaseUser: null, // Mock이므로 Firebase User 없음
             isAuthenticated: true,
+            isLoading: false,
+            error: null,
+        });
+
+        useRoleStore.setState({
+            currentRole: roleEntity,
+            isLoading: false,
+            error: null,
+        });
+
+        useUserStore.setState({
+            currentUser: userEntity,
             isLoading: false,
             error: null,
         });
