@@ -5,11 +5,13 @@ import { privateRoutes } from './private';
 import { RouteGuard } from '../../guards/RouteGuard';
 import { PrivateLayout } from '../../layouts/PrivateLayout';
 import { AUTH_ROUTES } from '@/service/auth/routes/constants';
+import { RouteErrorPage } from '@/components/ErrorBoundary';
 
 // 모든 서비스 routes 통합
 export const routes: RouteObject[] = [
     {
         path: ROOT_ROUTES.HOME,
+        errorElement: <RouteErrorPage />,
         children: [
             {
                 index: true,
@@ -22,9 +24,11 @@ export const routes: RouteObject[] = [
             // Private routes: RouteGuard(인증+권한) → PrivateLayout(레이아웃)
             {
                 element: <RouteGuard />,
+                errorElement: <RouteErrorPage />,
                 children: [
                     {
                         element: <PrivateLayout />,
+                        errorElement: <RouteErrorPage />,
                         children: privateRoutes,
                     },
                 ],
