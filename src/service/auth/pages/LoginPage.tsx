@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
+import { ShieldCheck, User, Eye } from 'lucide-react';
+import { Box, Card, Flex, Text, Heading, TextField, Button, Callout, Separator } from '@radix-ui/themes';
 import { useAuth } from '../hooks/useAuth';
 import { useAuthStore } from '@/repositories/authRepository/store/authStore';
 import { useRoleStore } from '@/repositories/roleRepository/store/roleStore';
 import { useUserStore } from '@/repositories/userRepository/store/userStore';
 import { DASHBOARD_ROUTES } from '@/service/dashboard/routes/constants';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RoleEntity } from '@/repositories/roleRepository/entity/roleEntity';
 import { UserEntity } from '@/repositories/userRepository/entity/userEntity';
 
-// 테스트용 Mock 데이터 (2 depth 기준)
+// Mock 데이터 (2 depth 기준)
 const MOCK_USERS = {
     admin: {
         user: { id: 'admin-001', email: 'admin@test.com', name: '관리자' },
@@ -23,6 +21,9 @@ const MOCK_USERS = {
             page_access: ['dashboard', 'admin'], // 전체 허용
             state: 'ENABLED' as const,
         },
+        icon: ShieldCheck,
+        description: '전체 접근',
+        color: 'green' as const,
     },
     manager: {
         user: { id: 'manager-001', email: 'manager@test.com', name: '매니저' },
@@ -33,6 +34,9 @@ const MOCK_USERS = {
             page_access: ['dashboard.home', 'dashboard.analytics'], // 홈, 분석
             state: 'ENABLED' as const,
         },
+        icon: User,
+        description: '홈, 분석',
+        color: 'blue' as const,
     },
     viewer: {
         user: { id: 'viewer-001', email: 'viewer@test.com', name: '뷰어' },
@@ -43,6 +47,9 @@ const MOCK_USERS = {
             page_access: ['dashboard.home'], // 홈만
             state: 'ENABLED' as const,
         },
+        icon: Eye,
+        description: '홈만',
+        color: 'gray' as const,
     },
 };
 
@@ -96,83 +103,128 @@ export function LoginPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">로그인</CardTitle>
-                    <CardDescription>계정에 로그인하세요</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && (
-                            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                                {error.message}
-                            </div>
-                        )}
+        <Flex
+            align="center"
+            justify="center"
+            style={{
+                minHeight: '100vh',
+                background: 'linear-gradient(to bottom right, var(--gray-2), white, var(--blue-2))'
+            }}
+            p="4"
+        >
+            <Box style={{ width: '100%', maxWidth: '400px' }}>
+                {/* Logo / Brand */}
+                <Flex direction="column" align="center" mb="6">
+                    <Flex
+                        align="center"
+                        justify="center"
+                        mb="4"
+                        style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: 'var(--radius-3)',
+                            background: 'var(--accent-9)',
+                            boxShadow: '0 10px 25px -10px var(--accent-8)'
+                        }}
+                    >
+                        <Text size="6" weight="bold" style={{ color: 'white' }}>W</Text>
+                    </Flex>
+                    <Heading size="6" weight="bold">WiseUp</Heading>
+                    <Text size="2" color="gray" mt="1">학습 관리 시스템</Text>
+                </Flex>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="email">이메일</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="email@example.com"
-                            />
-                        </div>
+                {/* Login Card */}
+                <Card size="4" style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}>
+                    <Flex direction="column" gap="5">
+                        {/* Card Header */}
+                        <Flex direction="column" align="center" gap="1">
+                            <Heading size="5" weight="medium">로그인</Heading>
+                            <Text size="2" color="gray">계정 정보를 입력하세요</Text>
+                        </Flex>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="password">비밀번호</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                            />
-                        </div>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit}>
+                            <Flex direction="column" gap="4">
+                                {error && (
+                                    <Callout.Root color="red" size="1">
+                                        <Callout.Text>{error.message}</Callout.Text>
+                                    </Callout.Root>
+                                )}
 
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? '로그인 중...' : '로그인'}
-                        </Button>
-                    </form>
+                                <Flex direction="column" gap="2">
+                                    <Text as="label" size="2" weight="medium" htmlFor="email">
+                                        이메일
+                                    </Text>
+                                    <TextField.Root
+                                        id="email"
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="email@example.com"
+                                        size="3"
+                                    />
+                                </Flex>
 
-                    {/* 테스트용 Mock 로그인 버튼 */}
-                    <div className="border-t pt-4">
-                        <p className="mb-3 text-center text-sm text-muted-foreground">
-                            테스트용 Mock 로그인
-                        </p>
-                        <div className="grid grid-cols-3 gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleMockLogin('admin')}
-                            >
-                                Admin
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleMockLogin('manager')}
-                            >
-                                Manager
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleMockLogin('viewer')}
-                            >
-                                Viewer
-                            </Button>
-                        </div>
-                        <p className="mt-2 text-center text-xs text-muted-foreground">
-                            Admin: 전체 접근 | Manager: 분석 페이지 | Viewer: 홈만
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                                <Flex direction="column" gap="2">
+                                    <Text as="label" size="2" weight="medium" htmlFor="password">
+                                        비밀번호
+                                    </Text>
+                                    <TextField.Root
+                                        id="password"
+                                        type="password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="********"
+                                        size="3"
+                                    />
+                                </Flex>
+
+                                <Button type="submit" size="3" disabled={isLoading} style={{ marginTop: '8px' }}>
+                                    {isLoading ? '로그인 중...' : '로그인'}
+                                </Button>
+                            </Flex>
+                        </form>
+
+                        {/* Divider */}
+                        <Flex align="center" gap="3">
+                            <Separator size="4" style={{ flex: 1 }} />
+                            <Text size="1" color="gray" style={{ textTransform: 'uppercase' }}>
+                                테스트 계정
+                            </Text>
+                            <Separator size="4" style={{ flex: 1 }} />
+                        </Flex>
+
+                        {/* Mock Login Buttons */}
+                        <Flex gap="3">
+                            {(Object.keys(MOCK_USERS) as (keyof typeof MOCK_USERS)[]).map((userType) => {
+                                const mockUser = MOCK_USERS[userType];
+                                const IconComponent = mockUser.icon;
+                                return (
+                                    <Button
+                                        key={userType}
+                                        type="button"
+                                        variant="soft"
+                                        color={mockUser.color}
+                                        onClick={() => handleMockLogin(userType)}
+                                        style={{ flex: 1, flexDirection: 'column', height: 'auto', padding: '12px 8px' }}
+                                    >
+                                        <IconComponent style={{ width: '20px', height: '20px', marginBottom: '4px' }} />
+                                        <Text size="2" weight="medium">{mockUser.role.name}</Text>
+                                        <Text size="1" color="gray">{mockUser.description}</Text>
+                                    </Button>
+                                );
+                            })}
+                        </Flex>
+                    </Flex>
+                </Card>
+
+                {/* Footer */}
+                <Text size="1" color="gray" align="center" mt="6" style={{ display: 'block' }}>
+                    2024 WiseUp. All rights reserved.
+                </Text>
+            </Box>
+        </Flex>
     );
 }

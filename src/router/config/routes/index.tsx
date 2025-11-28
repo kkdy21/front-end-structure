@@ -5,7 +5,7 @@ import { privateRoutes } from './private';
 import { RouteGuard } from '../../guards/RouteGuard';
 import { PrivateLayout } from '../../layouts/PrivateLayout';
 import { AUTH_ROUTES } from '@/service/auth/routes/constants';
-import { RouteErrorPage } from '@/components/ErrorBoundary';
+import { RouteErrorPage } from '@/components/feedback';
 
 // 모든 서비스 routes 통합
 export const routes: RouteObject[] = [

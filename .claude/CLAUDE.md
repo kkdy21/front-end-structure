@@ -33,7 +33,7 @@ This is a React 19 + TypeScript + Vite frontend application using Firebase as th
 - **Vite**: 6.2.0
 - **State Management**: Zustand 5.0.8
 - **Routing**: React Router v7.6.0
-- **Styling**: Tailwind CSS v4.1.17 + shadcn/ui
+- **Styling**: Tailwind CSS v4.1.17 + Radix Themes
 - **Backend**: Firebase 12.2.1 (Firestore, Storage, Functions, Auth)
 
 ### Path Alias
@@ -51,9 +51,13 @@ This is a React 19 + TypeScript + Vite frontend application using Firebase as th
 ```
 src/
 ├── repositories/          # Data access layer with Firebase integration
-├── router/                # Routing & RBAC configuration
+├── router/                # Routing & RBAC configuration (guards, layouts)
 ├── service/               # Feature modules (auth, dashboard, etc.)
-├── components/            # Shared UI components (shadcn/ui)
+├── components/            # Shared UI components
+│   ├── navigation/        # Navigation components (Sidebar - custom)
+│   ├── layouts/           # App-level layout components (AppSidebar, AppHeader)
+│   ├── feedback/          # User feedback components (ErrorBoundary, Toast)
+│   └── icons/             # Icon wrapper components
 ├── hooks/                 # Custom React hooks (여러 store 조합용)
 ├── utils/                 # Helper functions
 ├── libs/                  # External library integrations (firebase)
@@ -61,9 +65,9 @@ src/
 ├── constants/             # Global constants
 ├── stores/                # Global Zustand stores
 ├── assets/                # Static assets
-├── App.tsx                # Root component
+├── App.tsx                # Root component (Theme Provider)
 ├── main.tsx               # Entry point
-└── index.css              # Global styles
+└── index.css              # Global styles (Radix Themes import)
 ```
 
 ### Service Directory Structure
@@ -332,14 +336,211 @@ bookmarkTypeOptions.OPTIONS_WITH_ALL  // Array including ALL option
 - Type-safe frontend IDs (independent of API values)
 - Separation: `id` (frontend), `value` (API), `label` (UI)
 
-## UI Components
+## UI Components - Radix Themes (Critical Convention)
 
-### shadcn/ui Components
-Located in `src/components/ui/`:
-- `button.tsx`, `input.tsx`, `label.tsx`, `card.tsx` etc.
-- Icons: Use shadcn/ui icon components or install lucide-react as needed
+### Radix Themes Overview
 
-### CSS Utility
+이 프로젝트는 **Radix Themes**를 사용합니다. Radix Themes는 완전한 디자인 시스템으로, 사전 스타일링된 고품질 React 컴포넌트를 제공합니다.
+
+### Theme Provider 설정
+
+앱 최상위에서 `Theme` 컴포넌트로 래핑:
+
+```typescript
+// src/App.tsx
+import { Theme } from '@radix-ui/themes';
+
+function App() {
+    return (
+        <Theme accentColor="blue" grayColor="slate" radius="medium" scaling="100%">
+            {/* App content */}
+        </Theme>
+    );
+}
+```
+
+### 주요 컴포넌트 카테고리
+
+| 카테고리 | 컴포넌트 | 용도 |
+|---------|---------|------|
+| **Layout** | `Box`, `Flex`, `Grid`, `Container`, `Section` | 레이아웃 구성 |
+| **Typography** | `Text`, `Heading`, `Code`, `Quote`, `Em`, `Strong` | 텍스트 스타일링 |
+| **Form** | `Button`, `TextField`, `TextArea`, `Checkbox`, `Select`, `Switch`, `RadioGroup` | 폼 요소 |
+| **Data Display** | `Card`, `Table`, `Badge`, `Avatar`, `Separator`, `DataList` | 데이터 표시 |
+| **Feedback** | `Callout`, `Progress`, `Spinner` | 사용자 피드백 |
+| **Navigation** | `Tabs`, `DropdownMenu` | 네비게이션 |
+| **Overlay** | `Dialog`, `AlertDialog`, `Popover`, `Tooltip`, `HoverCard` | 오버레이 UI |
+
+### Radix Themes Import 방식
+
+```typescript
+// ✅ 올바른 import (모든 컴포넌트는 @radix-ui/themes에서 직접 import)
+import { Box, Flex, Text, Button, Card, TextField, Tabs, Badge } from '@radix-ui/themes';
+
+// ❌ 잘못된 import (개별 패키지에서 import 금지)
+import { Box } from '@radix-ui/react-box';
+```
+
+### 컴포넌트 작성 패턴
+
+```tsx
+import { Box, Card, Flex, Text, Heading, Button, Badge } from '@radix-ui/themes';
+
+export function ExampleComponent() {
+    return (
+        <Flex direction="column" gap="4">
+            <Box>
+                <Heading size="6" weight="bold">제목</Heading>
+                <Text size="2" color="gray">설명</Text>
+            </Box>
+
+            <Card size="2">
+                <Flex justify="between" align="center">
+                    <Text>콘텐츠</Text>
+                    <Badge color="blue">라벨</Badge>
+                </Flex>
+            </Card>
+
+            <Button size="2">확인</Button>
+        </Flex>
+    );
+}
+```
+
+### Radix Themes 토큰 시스템
+
+Radix Themes는 CSS 변수를 통한 토큰 시스템을 제공합니다:
+
+**Color Scales** (1-12 단계):
+- `--gray-1` ~ `--gray-12` (배경 → 전경)
+- `--accent-1` ~ `--accent-12` (Theme accentColor 기반)
+- `--blue-1` ~ `--blue-12`, `--red-1`, `--green-1`, `--amber-1` 등
+
+**사용 예시**:
+```tsx
+<Flex
+    style={{
+        background: 'var(--blue-3)',
+        color: 'var(--blue-11)'
+    }}
+>
+    <Text>Content</Text>
+</Flex>
+```
+
+**Spacing Scale**:
+- `--space-1` ~ `--space-9` (props로 사용: `gap="4"`, `p="3"`, `m="2"`)
+
+**Radius Scale**:
+- `--radius-1` ~ `--radius-6`
+
+### Radix Themes Props 패턴
+
+**Responsive Props**:
+```tsx
+<Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
+
+<Flex display={{ initial: 'none', sm: 'flex' }}>
+
+<Text size={{ initial: '2', md: '4' }}>
+```
+
+**Color Props**:
+```tsx
+<Button color="blue">
+<Badge color="green">
+<Text color="gray">
+<Callout.Root color="red">
+```
+
+**Size Props**:
+```tsx
+<Button size="1">작은</Button>
+<Button size="2">중간</Button>
+<Button size="3">큰</Button>
+
+<Card size="1">
+<Card size="2">
+<Card size="3">
+```
+
+**Variant Props**:
+```tsx
+<Button variant="solid">기본</Button>
+<Button variant="soft">부드러운</Button>
+<Button variant="outline">외곽선</Button>
+<Button variant="ghost">투명</Button>
+```
+
+### Component Directory Structure
+
+```
+src/components/
+├── navigation/            # 커스텀 Sidebar (Radix Themes에 없음)
+│   ├── sidebar.tsx        # shadcn/ui 기반 커스텀 Sidebar 유지
+│   ├── collapsible.tsx
+│   └── index.ts
+├── feedback/              # 커스텀 피드백 컴포넌트
+│   ├── spinner.tsx
+│   ├── sonner.tsx         # Toast (Sonner 라이브러리)
+│   ├── ErrorBoundary.tsx
+│   └── index.ts
+├── layouts/               # App-level 레이아웃
+│   ├── AppSidebar.tsx     # Radix Themes + 커스텀 Sidebar
+│   ├── AppHeader.tsx      # Radix Themes 컴포넌트 사용
+│   └── index.ts
+├── icons/                 # 아이콘 래퍼
+│   ├── Icon.tsx
+│   └── index.ts
+└── primitives/            # 레거시 (필요시 제거 예정)
+```
+
+### Import 규칙 (Updated for Radix Themes)
+
+```typescript
+// ✅ Radix Themes 컴포넌트
+import { Box, Flex, Text, Button, Card, TextField, Tabs, Badge } from '@radix-ui/themes';
+
+// ✅ 커스텀 Navigation (Sidebar는 Radix Themes에 없음)
+import { Sidebar, SidebarProvider, SidebarTrigger } from '@/components/navigation';
+
+// ✅ 커스텀 Feedback
+import { Toaster, ErrorBoundary } from '@/components/feedback';
+
+// ✅ 레이아웃 컴포넌트
+import { AppSidebar, AppHeader } from '@/components/layouts';
+
+// ✅ 아이콘
+import { Icon } from '@/components/icons';
+import { User, Settings } from 'lucide-react';
+```
+
+### 커스텀 Sidebar 유지
+
+Radix Themes에는 Sidebar 컴포넌트가 없으므로, 기존 shadcn/ui 기반 커스텀 Sidebar를 유지합니다:
+
+```typescript
+// src/components/navigation/sidebar.tsx - 기존 유지
+export {
+    Sidebar,
+    SidebarProvider,
+    SidebarContent,
+    SidebarTrigger,
+    // ... 기타 Sidebar 컴포넌트들
+}
+```
+
+### Layout 컴포넌트 위치 규칙
+
+| 컴포넌트 유형 | 위치 | 예시 |
+|--------------|------|------|
+| **라우터 레이아웃** | `router/layouts/` | `PrivateLayout.tsx` (Outlet 포함) |
+| **UI 레이아웃** | `components/layouts/` | `AppSidebar.tsx`, `AppHeader.tsx` |
+
+### CSS Utility (Tailwind + Radix 병행)
+
+Tailwind CSS는 Radix Themes와 함께 사용 가능합니다:
+
 ```typescript
 // src/utils/cn.ts
 import { clsx } from 'clsx';
@@ -349,6 +550,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 ```
+
+```tsx
+// Tailwind와 Radix Themes 병행 사용
+<Flex className="hover:shadow-md transition-shadow">
+    <Card size="2">
+        <Text>Content</Text>
+    </Card>
+</Flex>
+```
+
+### Radix Themes vs Tailwind 사용 기준
+
+| 상황 | 권장 | 예시 |
+|------|------|------|
+| 레이아웃, 타이포그래피, 폼, 카드 | **Radix Themes** | `<Flex>`, `<Card>`, `<Button>` |
+| hover, transition 등 상태 | **Tailwind** | `className="hover:bg-gray-2"` |
+| 커스텀 스타일링 | **CSS 변수 + style** | `style={{ background: 'var(--blue-3)' }}` |
+| 반응형 레이아웃 | **Radix Themes Props** | `columns={{ initial: '1', lg: '3' }}` |
 
 ## Key Implementation Patterns
 
@@ -425,11 +644,36 @@ export function useAuth() {
 }
 ```
 
+### Pattern 5: Radix Themes Card with Icon
+```tsx
+// 공통 패턴: 아이콘 + 카드
+<Card size="2">
+    <Flex justify="between" align="start">
+        <Flex direction="column" gap="1">
+            <Text size="2" color="gray">제목</Text>
+            <Heading size="6">값</Heading>
+        </Flex>
+        <Flex
+            align="center"
+            justify="center"
+            style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: 'var(--radius-3)',
+                background: 'var(--blue-3)'
+            }}
+        >
+            <Icon style={{ color: 'var(--blue-11)' }} />
+        </Flex>
+    </Flex>
+</Card>
+```
+
 ## App Bootstrap
 
 ### Entry Point Flow
 1. `main.tsx` → Renders `App.tsx`
-2. `App.tsx` → Wraps with `AuthProvider`
+2. `App.tsx` → Wraps with `Theme` (Radix Themes) → `AuthProvider`
 3. `AuthProvider` → Initializes Firebase auth state, loads user/role data
 4. `RouterProvider` → Handles routing after auth ready
 

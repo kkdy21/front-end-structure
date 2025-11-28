@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useAuthStore } from '@/repositories/authRepository/store/authStore';
 import { useRoleStore } from '@/repositories/roleRepository/store/roleStore';
 import { useUserStore } from '@/repositories/userRepository/store/userStore';
-import { Loading } from '@/components/Loading';
+import { Spinner, SpinnerContainer, SpinnerFullPage, SpinnerText } from '@/components/feedback';
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             unsubscribe = subscribeAuthState(async () => {
                 // 초기화 완료 후 Firebase User가 있으면 추가 정보 로드
-                const firebaseUser = useAuthStore.getState().firebaseUser;
+                const { firebaseUser, isAuthenticated } = useAuthStore.getState();
                 if (firebaseUser) {
                     try {
                         await Promise.all([
@@ -40,8 +40,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         clearCurrentUser();
                         clearCurrentRole();
                     }
-                } else {
-                    // 로그아웃 상태면 모든 상태 초기화
+                } else if (!isAuthenticated) {
+                    // 진짜 로그아웃 상태일 때만 초기화
+                    // Mock 로그인의 경우 isAuthenticated=true, firebaseUser=null 이므로 초기화하지 않음
                     clearCurrentUser();
                     clearCurrentRole();
                 }
@@ -56,7 +57,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, [subscribeAuthState, getUserById, getRoleByUserId, clearCurrentUser, clearCurrentRole]);
 
     if (isInitializing) {
-        return <Loading />;
+        return (
+            <SpinnerFullPage>
+                <SpinnerContainer>
+                    <Spinner size="lg" />
+                    <SpinnerText>로딩 중...</SpinnerText>
+                </SpinnerContainer>
+            </SpinnerFullPage>
+        );
     }
 
     return <>{children}</>;
