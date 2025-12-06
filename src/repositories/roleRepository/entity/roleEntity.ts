@@ -3,36 +3,36 @@ import type { RoleDTO } from '../schema/dto/roleDTO';
 export class RoleEntity {
   constructor(private _dto: RoleDTO) {}
 
-  get roleId(): string {
-    return this._dto.role_id;
+  get id(): string {
+    return this._dto.id;
   }
 
   get name(): string {
     return this._dto.name;
   }
 
-  get roleType(): string {
-    return this._dto.role_type;
+  get displayName(): string {
+    return this._dto.displayName ?? this._dto.name;
+  }
+
+  get description(): string | undefined {
+    return this._dto.description;
   }
 
   get pageAccess(): string[] {
-    return this._dto.page_access;
+    return this._dto.pageAccess ?? [];
   }
 
-  get state(): 'ENABLED' | 'DISABLED' {
-    return this._dto.state;
+  get isActive(): boolean {
+    return this._dto.isActive;
   }
 
-  get isEnabled(): boolean {
-    return this._dto.state === 'ENABLED';
+  get createdAt(): unknown {
+    return this._dto.createdAt;
   }
 
-  get createdAt(): string | undefined {
-    return this._dto.created_at;
-  }
-
-  get updatedAt(): string | undefined {
-    return this._dto.updated_at;
+  get updatedAt(): unknown {
+    return this._dto.updatedAt;
   }
 
   get dto(): RoleDTO {

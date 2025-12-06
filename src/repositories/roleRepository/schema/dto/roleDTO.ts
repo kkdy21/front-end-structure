@@ -1,11 +1,12 @@
 export interface RoleDTO {
-  role_id: string;
+  id: string;
   name: string;
-  role_type: string;
-  page_access: string[];  // 페이지 접근 패턴 ["dashboard.*", "project.list"]
-  state: 'ENABLED' | 'DISABLED';
-  created_at?: string;
-  updated_at?: string;
+  displayName?: string;  // 표시용 이름 (예: "관리자", "선생님")
+  description?: string;
+  pageAccess: string[];  // 페이지 접근 패턴 ["dashboard.*", "admin.users"]
+  isActive: boolean;
+  createdAt?: unknown;   // Firestore Timestamp
+  updatedAt?: unknown;   // Firestore Timestamp
 }
 
 export interface UserDTO {
