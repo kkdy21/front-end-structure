@@ -6,7 +6,9 @@ export interface LoginParameters {
 export interface SignupParameters {
     email: string;
     password: string;
-    name: string;
+    displayName: string;
+    roleId?: string;
+    metadata?: Record<string, unknown>;
 }
 
 export interface ResetPasswordParameters {

@@ -3,6 +3,7 @@ import type { User as FirebaseUser, Unsubscribe } from 'firebase/auth';
 import type { BaseState, BaseActions } from '@/repositories/baseStore';
 import { baseInitialState } from '@/repositories/baseStore';
 import type { LoginParameters, SignupParameters } from '../schema/api-verbs/login';
+import type { SignupResultDTO } from '../schema/dto/authDTO';
 import { authRepository } from '../api/authRepository';
 
 interface AuthState extends BaseState, BaseActions {
@@ -13,7 +14,8 @@ interface AuthState extends BaseState, BaseActions {
 
     // Actions - 인증
     login: (params: LoginParameters) => Promise<FirebaseUser>;
-    signup: (params: SignupParameters) => Promise<FirebaseUser>;
+    loginWithGoogle: () => Promise<FirebaseUser>;
+    signup: (params: SignupParameters) => Promise<SignupResultDTO>;
     logout: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
 
@@ -49,12 +51,28 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     },
 
+    loginWithGoogle: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const firebaseUser = await authRepository.loginWithGoogle();
+            set({
+                firebaseUser,
+                isAuthenticated: true,
+                isLoading: false,
+            });
+            return firebaseUser;
+        } catch (err) {
+            set({ error: err as Error, isLoading: false });
+            throw err;
+        }
+    },
+
     signup: async (params) => {
         set({ isLoading: true, error: null });
         try {
-            const firebaseUser = await authRepository.signup(params);
+            const result = await authRepository.signup(params);
             set({ isLoading: false });
-            return firebaseUser;
+            return result;
         } catch (err) {
             set({ error: err as Error, isLoading: false });
             throw err;
